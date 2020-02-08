@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -337,6 +338,15 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 	if !strings.HasSuffix(c.BaseURL.Path, "/") {
 		return nil, fmt.Errorf("BaseURL must have a trailing slash, but %q does not", c.BaseURL)
 	}
+
+	isPathTraversing, err := regexp.MatchString(`\.\./`, urlStr)
+	if err != nil {
+		return nil, err
+	}
+	if isPathTraversing {
+		return nil, fmt.Errorf("urlStr must not traverse Path, but %q does", urlStr)
+	}
+
 	u, err := c.BaseURL.Parse(urlStr)
 	if err != nil {
 		return nil, err

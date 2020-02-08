@@ -317,6 +317,11 @@ func TestNewRequest_badURL(t *testing.T) {
 	c := NewClient(nil)
 	_, err := c.NewRequest("GET", ":", nil)
 	testURLParseError(t, err)
+
+	_, err = c.NewRequest("GET", "../", nil)
+	if err == nil {
+		t.Error("Expected error to be returned.")
+	}
 }
 
 // ensure that no User-Agent header is set if the client's UserAgent is empty.
